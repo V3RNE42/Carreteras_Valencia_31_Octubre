@@ -2,16 +2,23 @@ let coordenadasDB;
 
 let incidents;
 
-// Colores para tipos de incidente
+// Función para convertir texto a formato título
+function toTitleCase(str) {
+    return str.toLowerCase().split(' ').map(word =>
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+}
+
+// Colores actualizados con un esquema más profesional
 const tipoColores = {
-    'Corte total': '#000000',
-    'Corte total hacia Alicante': '#899000',
-    'Corte de un carril': '#cc0000',
-    'Condiciones difíciles': '#ffa500',
-    'Carriles izquierdo y central cerrados': '#00FFFF',
-    'Corte de un carril en ambos sentidos': '#899000',
-    'Sentido decreciente de la kilometración': '#FF00FF',
-    'Sentido decreciente': '#FF69B4'
+    'RETENCIÓN / CONGESTIÓN': '#FF0000',         // Rojo brillante
+    'DESVÍO OPERATIVO': '#00FF00',               // Verde brillante
+    'OTROS': '#0000FF',                          // Azul brillante
+    'OBRA / MANTENIMIENTO VIA': '#FF9900',       // Naranja brillante
+    'RESTRICCIONES EN ACCESOS': '#9900FF',       // Púrpura brillante
+    'OBSTÁCULO FIJO': '#FF00FF',                 // Magenta brillante
+    'CARRIL DE ALTA OCUPACIÓN ABIERTO': '#00FFFF', // Cian brillante
+    'INUNDACIÓN': '#000',                   // Negro
 };
 
 function isValidValenciaCoordinate(lat, lon) {
@@ -40,19 +47,19 @@ async function init() {
     try {
         const response = await fetch('coordenadas.json');
         const coordenadasDB = await response.json();
- 
+
         incidents = await fetch('incidentes.json').then(response => response.json());
- 
+
         const validPoints = [];
         const map = L.map('map').setView([39.47391, -0.37966], 9);
- 
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
- 
+
         // Conjunto para trackear los tipos de incidentes que realmente aparecen
         const tiposActivos = new Set();
- 
+
         // Procesar incidentes
         incidents.forEach(incident => {
             const startCoords = coordenadasDB[incident.carretera]?.[incident.km_inicio.toString()];
@@ -61,11 +68,11 @@ async function init() {
                 console.log(`Ignorando punto: ${incident.carretera} km ${incident.km_inicio}`);
                 return;
             }
- 
+
             const color = tipoColores[incident.tipo] || '#gray';
             tiposActivos.add(incident.tipo);
             validPoints.push([startCoords.lat, startCoords.lon]);
- 
+
             L.circleMarker(
                 [startCoords.lat, startCoords.lon],
                 {
@@ -85,32 +92,45 @@ async function init() {
                         `PK: ${incident.km_inicio}`}
                 `);
         });
- 
+
         // Añadir leyenda solo con los tipos activos
         const legend = L.control({ position: 'bottomright' });
         legend.onAdd = function (map) {
             const div = L.DomUtil.create('div', 'legend');
             let content = '<h4>Tipos de Incidentes</h4>';
- 
+
             // Solo iterar sobre los tipos que están activos
             for (const tipo of tiposActivos) {
                 const color = tipoColores[tipo];
-                content += `<div style="padding: 4px 0;"><i style="background: ${color}"></i>${tipo}</div>`;
+                // Convertir el texto a formato título para mejor legibilidad
+                const displayText = toTitleCase(tipo);
+                content += `<div style="padding: 4px 0;">
+                    <i style="background: ${color}; opacity: 0.8;"></i>
+                    ${displayText}
+                </div>`;
             }
- 
+
             div.innerHTML = content;
             return div;
         };
         legend.addTo(map);
- 
+
         // Ajustar el mapa a los puntos válidos
         if (validPoints.length > 0) {
             map.fitBounds(validPoints);
         }
- 
+
     } catch (error) {
         console.error('Error cargando coordenadas:', error);
     }
- }
+}
 
 document.addEventListener('DOMContentLoaded', init);
+
+function scheduleReload() {
+    setTimeout(() => {
+        window.location.reload();
+    }, 5 * 60 * 1000);  // 5 minutes
+}
+
+scheduleReload();
