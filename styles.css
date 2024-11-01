@@ -11,23 +11,54 @@ body {
 }
 
 .legend {
-    padding: 8px 10px;
+    padding: 12px 15px;
     background: white;
-    background: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.95);
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
-    border-radius: 5px;
-    line-height: 24px;
+    border-radius: 8px;
+    line-height: 1.8;
+    font-size: calc(14px + 0.4vw); /* Tamaño de fuente responsive */
+    max-width: 90vw; /* Evitar que ocupe toda la pantalla en móviles */
 }
 
 .legend i {
-    width: 18px;
-    height: 18px;
+    width: calc(24px + 0.5vw);  /* Cuadrados de color más grandes y responsive */
+    height: calc(24px + 0.5vw);
     float: left;
-    margin-right: 8px;
-    opacity: 0.7;
+    margin-right: 12px;
+    opacity: 0.85;
+    border-radius: 4px;
+    border: 1px solid rgba(0,0,0,0.2);
 }
 
 .legend h4 {
-    margin: 0 0 5px;
+    margin: 0 0 10px;
     color: #333;
+    font-size: calc(16px + 0.5vw); /* Título más grande y responsive */
+    font-weight: bold;
+}
+
+/* Estilos para pantallas pequeñas */
+@media (max-width: 768px) {
+    .legend {
+        padding: 10px;
+        max-width: 85vw;
+        line-height: 2;
+    }
+
+    .legend i {
+        margin-right: 10px;
+    }
+}
+
+/* Estilos para pantallas muy pequeñas */
+@media (max-width: 480px) {
+    .legend {
+        max-width: 80vw;
+        font-size: calc(12px + 0.4vw);
+    }
+
+    .legend h4 {
+        font-size: calc(14px + 0.5vw);
+    }
 }
